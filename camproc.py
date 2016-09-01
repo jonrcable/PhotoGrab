@@ -139,31 +139,11 @@ class PhotoGrab:
         if self.script_cfg['debug']:
             print (' run all of our prechecks ')
 
-        # we might need to create a few dirs
-        if not os.path.isdir(self.script_cfg['path'] + '/tmp'):
-            os.mkdir(self.script_cfg['path'] + '/tmp')
-            if self.script_cfg['debug']:
-                print (' created a tmp folder ')
+        # create our directories
+        self.CreateStructure()
 
-        if not os.path.isdir(self.script_cfg['path'] + '/archives'):
-            os.mkdir(self.script_cfg['path'] + '/archives')
-            if self.script_cfg['debug']:
-                print(' created an archive directory ')
-
-        # test if a previous database file exists
-        if os.path.isfile(self.script_cfg['path'] + '/tmp/process.sqlite'):
-            try:
-                # remove the trigger file
-                os.remove(script_cfg['path'] + '/tmp/process.sqlite')
-                if self.script_cfg['debug']:
-                    print(' removed a stale database file ')
-
-            except:
-                # something went bad halt
-                if self.script_cfg['debug']:
-                    print(' failed to remove a stale database ')
-                # fail
-                return False
+        # cleanup any old jobs
+        self.CleanUp()
 
         # now try to start the database conection
         try:
@@ -251,6 +231,40 @@ class PhotoGrab:
 
         return
 
+
+    # create the directory structure
+    def CreateStructure(self):
+        # we might need to create a few dirs
+        if not os.path.isdir(self.script_cfg['path'] + '/tmp'):
+            os.mkdir(self.script_cfg['path'] + '/tmp')
+            if self.script_cfg['debug']:
+                print (' created a tmp folder ')
+
+        if not os.path.isdir(self.script_cfg['path'] + '/archives'):
+            os.mkdir(self.script_cfg['path'] + '/archives')
+            if self.script_cfg['debug']:
+                print(' created an archive directory ')
+
+        return
+
+    # cleanup any old stuff from the last job
+    def CleanUp(self):
+        # test if a previous database file exists
+        if os.path.isfile(self.script_cfg['path'] + '/tmp/process.sqlite'):
+            try:
+                # remove the trigger file
+                os.remove(script_cfg['path'] + '/tmp/process.sqlite')
+                if self.script_cfg['debug']:
+                    print(' removed a stale database file ')
+
+            except:
+                # something went bad halt
+                if self.script_cfg['debug']:
+                    print(' failed to remove a stale database ')
+                # fail
+                return False
+
+        return
 
     # create the new database structure
     def InitDB(self):
