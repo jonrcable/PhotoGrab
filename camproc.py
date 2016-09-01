@@ -285,7 +285,7 @@ class PhotoGrab:
             # report the elapsed time it took to run this process
             elapsed = stop - start
             # get the end time
-            delta = trigger + timedelta(elapsed)
+            delta = trigger + timedelta(0, elapsed)
 
             result['trigger'] = format(trigger)
             result['elapsed'] = "{:.12f}".format(elapsed)
