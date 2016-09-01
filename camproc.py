@@ -81,7 +81,6 @@ class PhotoGrab:
             elif self.script_cfg['triggers'] != 0 and self.process['count'] >= self.script_cfg['triggers']:
                 # stop the process and exit
                 self.End()
-                self.DisplayDB()
                 break
 
             # runs some triggers
@@ -118,11 +117,11 @@ class PhotoGrab:
     # If we need to close anything we do it here
     def End(self):
 
-        # if we have reached the end, should we report
-        self.DisplayDB()
-
         # move the database to a new store location
-        self.Save()
+        save = self.Save()
+        if save:
+            # if we have reached the end, should we report
+            self.DisplayDB()
 
         # close the sql connection
         self.sql.close()
@@ -323,14 +322,14 @@ class PhotoGrab:
             copyfile(self.script_cfg['path'] + '/tmp/process.sqlite', self.script_cfg['path'] + '/archives/' + archive + '/db.sqlite')
             print(' archive saved ', self.script_cfg['path'] + '/db/' + archive + '.sqlite')
 
-            return
+            return True
 
         except:
 
             if self.script_cfg['debug']:
                 print(' the archive was not saved ')
 
-            return
+            return False
 
 # Lets kick off the process
 PhotoGrab(camera_cfg, imu_cfg, offsets_cfg, script_cfg)
