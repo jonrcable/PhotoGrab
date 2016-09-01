@@ -1,0 +1,25 @@
+# script configuation file
+
+[camera_cfg]
+
+[imu_cfg]
+
+# ---- offsets_cfg.info -----
+# rest - time in sec to rest if no trigger, 0 none
+# ---------
+[offsets_cfg]
+    rest = 1
+
+# ---- script_cfg.info -----
+# debug - do you want to print out the debug information
+# headless - do you to run autonomously, till max BEWARE: when max set to 0 and this is True - infinity
+# path - path of the directory to monitor
+# max - max attempts at running this loop, 0 infinite
+# triggers - max triggers before ending this loop, 0 infinite
+# ---------
+[script_cfg]
+    debug = False
+    headless = True
+    path = /Users/Jon/Development/Code/Apps/CameraIMU
+    max = 50
+    triggers = 10

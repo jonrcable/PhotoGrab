@@ -1,9 +1,21 @@
 #!/usr/bin/python
-import os, re, sqlite3
+import os, re, sqlite3, configparser
 from _datetime import datetime, timedelta
 from time import sleep, perf_counter
 from shutil import copyfile
 from tabulate import tabulate
+
+config = configparser.ConfigParser()
+
+# choose a custom config or fail
+if os.path.isfile('config.inc'):
+    config.read('config.inc')
+else:
+    # no config file hard stop
+    print(' copy config.default to config.inc and setup the script')
+    exit()
+
+# we have a configuration lets setup the process
 
 # these are to store the hardware configs
 camera_cfg = {}
@@ -11,15 +23,15 @@ imu_cfg = {}
 
 # these are to store the project configs
 offsets_cfg = {}
-offsets_cfg['rest'] = 1 # time in sec to rest if no trigger, 0 none
+offsets_cfg['rest'] = config.getint('offsets_cfg', 'rest') # time in sec to rest if no trigger, 0 none
 
 # general script configs
 script_cfg = {}
-script_cfg['debug'] = False # do you want to print out the debug information
-script_cfg['headless'] = True # do you to run autonomously, till max BEWARE: when max set to 0 and this is True - infinity
-script_cfg['path'] = '/Users/Jon/Development/Code/Apps/CameraIMU' # path of the directory to monitor
-script_cfg['max'] = 50 # max attempts at running this loop, 0 infinite
-script_cfg['triggers'] = 10 # max triggers before ending this loop, 0 infinite
+script_cfg['debug'] = config.getboolean('script_cfg', 'debug') # do you want to print out the debug information
+script_cfg['headless'] = config.getboolean('script_cfg', 'headless') # do you to run autonomously, till max BEWARE: when max set to 0 and this is True - infinity
+script_cfg['path'] = config.get('script_cfg', 'path') # path of the directory to monitor
+script_cfg['max'] = config.getint('script_cfg', 'max') # max attempts at running this loop, 0 infinite
+script_cfg['triggers'] = config.getint('script_cfg', 'triggers') # max triggers before ending this loop, 0 infinite
 
 # define our main class
 class PhotoGrab:
