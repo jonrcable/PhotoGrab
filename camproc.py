@@ -115,6 +115,24 @@ class PhotoGrab:
                         # run the tigger process, fail
                         self.Event(False)
 
+    # If we need to close anything we do it here
+    def End(self):
+
+        # if we have reached the end, should we report
+        self.DisplayDB()
+
+        # move the database to a new store location
+        self.Save()
+
+        # close the sql connection
+        self.sql.close()
+
+        if self.script_cfg['debug']:
+            print(' sql connection closed ')
+            print(' process end ', self.process['loop'])
+
+        self.process['start'] = False
+        exit()
 
     # these are the init self checks for the process
     def Connect(self):
@@ -168,105 +186,6 @@ class PhotoGrab:
             return False
 
         return True
-
-
-    # create the new database structure
-    def InitDB(self):
-
-        try:
-            # create the new table to store the telemetry
-            self.database.execute(
-                'CREATE TABLE triggers (trigger VARCHAR, elapsed VARCHAR, delta INTEGER, telemetry BLOB)')
-            self.sql.commit()
-
-            if self.script_cfg['debug']:
-                print(' created a new triggers table ')
-            return True
-
-        except:
-            # something went bad halt
-            if self.script_cfg['debug']:
-                print(' failed to create a new database ')
-            # fail
-            return False
-
-
-    # insert a new row into the database
-    def InsertDB(self, result):
-
-        try:
-            # create the new table to store the telemetry
-            self.database.execute('''INSERT INTO triggers (trigger, elapsed, delta, telemetry) VALUES(?,?,?,?)''',
-                                  (result['trigger'], result['elapsed'], result['delta'], result['telemetry']))
-            self.sql.commit()
-
-            if self.script_cfg['debug']:
-                print(' inserted new event to table ')
-            return True
-
-        except:
-            # something went bad halt
-            if self.script_cfg['debug']:
-                print(' failed to insert event to table ', result)
-            # fail
-            return False
-
-    def DisplayDB(self):
-
-        try:
-            self.database.execute('SELECT rowid, trigger, delta, elapsed, telemetry FROM triggers')
-
-            rows =  self.database.fetchall()
-
-            print(tabulate(rows, headers=["Id", "Start", "Stop", "Delta", "Telemetry"], floatfmt=".12f"))
-
-        except:
-            print(' failed to display the summary event ')
-
-        return
-
-    # If we need to close anything we do it here
-    def End(self):
-
-        # if we have reached the end, should we report
-        self.DisplayDB()
-
-        # move the database to a new store location
-        self.Save()
-
-        # close the sql connection
-        self.sql.close()
-
-        if self.script_cfg['debug']:
-            print (' sql connection closed ')
-            print (' process end ', self.process['loop'])
-
-        self.process['start'] = False
-        exit()
-
-    # finally archive the database to its store location
-    def Save(self):
-        try:
-            self.database.execute('SELECT rowid, trigger, delta, elapsed, telemetry FROM triggers ORDER BY rowid LIMIT 1')
-            save =  self.database.fetchone()
-            archive = re.sub('[^a-zA-Z0-9\n]', '', save[1])
-
-            if not os.path.isdir(self.script_cfg['path'] + '/archives/' + archive):
-                os.mkdir(self.script_cfg['path'] + '/archives/' + archive)
-                if self.script_cfg['debug']:
-                    print(' created an process directory ')
-
-            copyfile(self.script_cfg['path'] + '/tmp/process.sqlite', self.script_cfg['path'] + '/archives/' + archive + '/db.sqlite')
-            print(' archive saved ', self.script_cfg['path'] + '/db/' + archive + '.sqlite')
-
-            return
-
-        except:
-
-            if self.script_cfg['debug']:
-                print(' the archive was not saved ')
-
-            return
 
     # this is the actual process to trigger an event
     def Event(self, trigger):
@@ -332,6 +251,86 @@ class PhotoGrab:
     def GetIMU(self):
 
         return
+
+
+    # create the new database structure
+    def InitDB(self):
+
+        try:
+            # create the new table to store the telemetry
+            self.database.execute(
+                'CREATE TABLE triggers (trigger VARCHAR, elapsed VARCHAR, delta INTEGER, telemetry BLOB)')
+            self.sql.commit()
+
+            if self.script_cfg['debug']:
+                print(' created a new triggers table ')
+            return True
+
+        except:
+            # something went bad halt
+            if self.script_cfg['debug']:
+                print(' failed to create a new database ')
+            # fail
+            return False
+
+
+    # insert a new row into the database
+    def InsertDB(self, result):
+
+        try:
+            # create the new table to store the telemetry
+            self.database.execute('''INSERT INTO triggers (trigger, elapsed, delta, telemetry) VALUES(?,?,?,?)''',
+                                  (result['trigger'], result['elapsed'], result['delta'], result['telemetry']))
+            self.sql.commit()
+
+            if self.script_cfg['debug']:
+                print(' inserted new event to table ')
+            return True
+
+        except:
+            # something went bad halt
+            if self.script_cfg['debug']:
+                print(' failed to insert event to table ', result)
+            # fail
+            return False
+
+    def DisplayDB(self):
+
+        try:
+            self.database.execute('SELECT rowid, trigger, delta, elapsed, telemetry FROM triggers')
+
+            rows =  self.database.fetchall()
+
+            print(tabulate(rows, headers=["Id", "Start", "Stop", "Delta", "Telemetry"], floatfmt=".12f"))
+
+        except:
+            print(' failed to display the summary event ')
+
+        return
+
+    # finally archive the database to its store location
+    def Save(self):
+        try:
+            self.database.execute('SELECT rowid, trigger, delta, elapsed, telemetry FROM triggers ORDER BY rowid LIMIT 1')
+            save =  self.database.fetchone()
+            archive = re.sub('[^a-zA-Z0-9\n]', '', save[1])
+
+            if not os.path.isdir(self.script_cfg['path'] + '/archives/' + archive):
+                os.mkdir(self.script_cfg['path'] + '/archives/' + archive)
+                if self.script_cfg['debug']:
+                    print(' created an process directory ')
+
+            copyfile(self.script_cfg['path'] + '/tmp/process.sqlite', self.script_cfg['path'] + '/archives/' + archive + '/db.sqlite')
+            print(' archive saved ', self.script_cfg['path'] + '/db/' + archive + '.sqlite')
+
+            return
+
+        except:
+
+            if self.script_cfg['debug']:
+                print(' the archive was not saved ')
+
+            return
 
 # Lets kick off the process
 PhotoGrab(camera_cfg, imu_cfg, offsets_cfg, script_cfg)
