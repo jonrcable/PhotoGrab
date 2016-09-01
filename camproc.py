@@ -234,16 +234,22 @@ class PhotoGrab:
 
     # create the directory structure
     def CreateStructure(self):
-        # we might need to create a few dirs
-        if not os.path.isdir(self.script_cfg['path'] + '/tmp'):
-            os.mkdir(self.script_cfg['path'] + '/tmp')
-            if self.script_cfg['debug']:
-                print (' created a tmp folder ')
 
-        if not os.path.isdir(self.script_cfg['path'] + '/archives'):
-            os.mkdir(self.script_cfg['path'] + '/archives')
-            if self.script_cfg['debug']:
-                print(' created an archive directory ')
+        try:
+            # we might need to create a few dirs
+            if not os.path.isdir(self.script_cfg['path'] + '/tmp'):
+                os.mkdir(self.script_cfg['path'] + '/tmp')
+                if self.script_cfg['debug']:
+                    print (' created a tmp folder ')
+
+            if not os.path.isdir(self.script_cfg['path'] + '/archives'):
+                os.mkdir(self.script_cfg['path'] + '/archives')
+                if self.script_cfg['debug']:
+                    print(' created an archive directory ')
+
+        except:
+            print(' failed to create directory hault')
+            exit()
 
         return
 
