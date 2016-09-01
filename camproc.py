@@ -5,8 +5,8 @@ from time import sleep, perf_counter
 from shutil import copyfile
 from tabulate import tabulate
 
+# open the config
 config = configparser.ConfigParser()
-
 # choose a custom config or fail
 if os.path.isfile('config.inc'):
     config.read('config.inc')
@@ -293,16 +293,19 @@ class PhotoGrab:
             # fail
             return False
 
+    # display pretty results
     def DisplayDB(self):
 
         try:
+            # get all the rows
             self.database.execute('SELECT rowid, trigger, delta, elapsed, telemetry FROM triggers')
-
             rows =  self.database.fetchall()
 
+            # pretty print them
             print(tabulate(rows, headers=["Id", "Start", "Stop", "Delta", "Telemetry"], floatfmt=".12f"))
 
         except:
+            # nothing to display
             print(' failed to display the summary event ')
 
         return
@@ -310,22 +313,26 @@ class PhotoGrab:
     # finally archive the database to its store location
     def Save(self):
         try:
+            # get the last row from the table
             self.database.execute('SELECT rowid, trigger, delta, elapsed, telemetry FROM triggers ORDER BY rowid LIMIT 1')
             save =  self.database.fetchone()
+            # remove any special chars
             archive = re.sub('[^a-zA-Z0-9\n]', '', save[1])
 
+            # make sure the dir does not already exists and create it
             if not os.path.isdir(self.script_cfg['path'] + '/archives/' + archive):
                 os.mkdir(self.script_cfg['path'] + '/archives/' + archive)
                 if self.script_cfg['debug']:
                     print(' created an process directory ')
 
+            # move the process to the archive
             copyfile(self.script_cfg['path'] + '/tmp/process.sqlite', self.script_cfg['path'] + '/archives/' + archive + '/db.sqlite')
             print(' archive saved ', self.script_cfg['path'] + '/db/' + archive + '.sqlite')
 
             return True
 
         except:
-
+            # nothing to save
             if self.script_cfg['debug']:
                 print(' the archive was not saved ')
 
