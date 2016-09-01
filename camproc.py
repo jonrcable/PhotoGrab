@@ -81,6 +81,7 @@ class PhotoGrab:
             elif self.script_cfg['triggers'] != 0 and self.process['count'] >= self.script_cfg['triggers']:
                 # stop the process and exit
                 self.End()
+                self.DisplayDB()
                 break
 
             # runs some triggers
@@ -257,6 +258,8 @@ class PhotoGrab:
 
             copyfile(self.script_cfg['path'] + '/tmp/process.sqlite', self.script_cfg['path'] + '/archives/' + archive + '/db.sqlite')
             print(' archive saved ', self.script_cfg['path'] + '/db/' + archive + '.sqlite')
+
+            return
 
         except:
 
