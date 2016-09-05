@@ -2,3 +2,4 @@
 config.inc
 /tmp
 /archives
+/bin/__pycache__

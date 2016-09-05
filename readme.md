@@ -12,3 +12,7 @@ sudo apt-get install libyaml-dev
     
 - install the following pythong libs
     sudo -H pip3.5 install pyserial sqlite3 re
+    
+# Notes for later
+this is exactly what we need!
+http://vislab-ccom.unh.edu/~schwehr/rt/python-binary-files.html
