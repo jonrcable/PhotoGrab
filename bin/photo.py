@@ -114,6 +114,10 @@ class PhotoGrab:
         # kill the imu process
         IMUDevice.StopIMU(IMUDevice, self.process['pid'], self.script_cfg)
 
+        # set some thing we will need
+        display = {}
+        archive = None
+
         # if the process count matches the trigger count
         if self.process['count'] == self.script_cfg['triggers']:
 
@@ -138,7 +142,7 @@ class PhotoGrab:
         # close our connections
         DBLite.CloseDB(DBLite, self.process['connection'], self.script_cfg)
 
-        # if we have result display them and save
+        # if we have result to display and save
         if self.process['count'] == self.script_cfg['triggers']:
 
             # pretty print the final results
