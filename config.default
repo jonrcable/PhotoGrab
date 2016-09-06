@@ -1,4 +1,5 @@
-# script configuation file
+# script config file
+# copy to config.inc to run
 
 [camera_cfg]
     baudrate = 384000
@@ -8,14 +9,19 @@
     datalen = 8
     device = /dev/USB0
 
+# ---- offsets_cfg.info -----
+# device - the device location to read from
+# delay - the time to delay while the imu starts
+# ---------
 [imu_cfg]
     device = /dev/cu.wchusbserial1410
+    delay = 2
 
 # ---- offsets_cfg.info -----
-# rest - time in sec to rest if no trigger, 0 none
+# rest - time in sec to rest if no trigger, use decimal for ms
 # ---------
 [offsets_cfg]
-    rest = 1
+    rest = 0.01
 
 # ---- script_cfg.info -----
 # debug - do you want to print out the debug information
@@ -30,5 +36,5 @@
     headless = True
     path = /Users/Jon/Development/Code/Apps/CameraIMU
     archive = /Users/Jon/Development/Code/Apps/CameraIMU
-    max = 100
+    max = 1000
     triggers = 5
