@@ -260,7 +260,7 @@ class PhotoGrab:
         else:
 
             if self.script_cfg['debug']:
-                print('trigger false ', self.process['loop'], ' of ', self.script_cfg['max'])
+                print('trigger false ', self.process['loop'], '/', self.script_cfg['max'])
 
             sleep(self.offsets_cfg['rest'])  # we should rest for X before we start again
 
