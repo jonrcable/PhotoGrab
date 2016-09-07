@@ -26,14 +26,11 @@ class PhotoGrab:
         self.process = {}
         self.process['start'] = False # init the main process status to true
         self.process['connection'] = {} # init the database connection
+        self.process['camera'] = {} # init the camera connection
         self.process['trigger'] = False # init the camera trigger to false
         self.process['loop'] = 0 # init the loop count
         self.process['count'] = 0 # init the fired count
         self.process['pid'] = 0  # the pid of the subprocess writing IMU data
-
-        # init our serial connections
-        self.camera_ser = None
-        self.imu_ser = None
 
         # lets start things off
         self.Start()
@@ -79,8 +76,13 @@ class PhotoGrab:
                         # run the tigger process, now
                         result = self.Event(True)
 
-                        # send the result to the database
-                        DBLite.InsertDB(DBLite, self.process['connection'], self.script_cfg, result)
+                        if not result:
+                            print( " trigger was not valid " )
+
+                        else:
+                            print(" trigger was valid ")
+                            # send the result to the database
+                            DBLite.InsertDB(DBLite, self.process['connection'], self.script_cfg, result)
 
                     # otherwise lets see if a tigger file exists
                     else:
@@ -91,8 +93,13 @@ class PhotoGrab:
                             # run the tigger process, now
                             result = self.Event(True)
 
-                            # send the result to the database
-                            DBLite.InsertDB(DBLite, self.process['connection'], self.script_cfg, result)
+                            if not result:
+                                print(" trigger is not ready ")
+
+                            else:
+                                print(" trigger recorded storing ")
+                                # send the result to the database
+                                DBLite.InsertDB(DBLite, self.process['connection'], self.script_cfg, result)
 
                             # remove the trigger file
                             remove(self.script_cfg['path'] + '/tmp/trigger.proc')
@@ -141,6 +148,8 @@ class PhotoGrab:
 
         # close our connections
         DBLite.CloseDB(DBLite, self.process['connection'], self.script_cfg)
+
+        CameraDevice.USBMode(CameraDevice, self.process['camera'], self.script_cfg)
 
         # if we have result to display and save
         if self.process['count'] == self.script_cfg['triggers']:
@@ -191,11 +200,30 @@ class PhotoGrab:
 
                 # close the database connection we no longer need it
                 DBLite.CloseDB(DBLite, self.process['connection'], self.script_cfg)
-                return  False
+                return False
 
             else:
                 if self.script_cfg['debug']:
                     print(' new imu connection started ')
+
+            # try to open the camera
+            camera = CameraDevice.Connect(CameraDevice, self.camera_cfg, self.script_cfg)
+            if not camera:
+
+                # close the database connection we no longer need it
+                #DBLite.CloseDB(DBLite, self.process['connection'], self.script_cfg)
+                # hault the imu device
+                #IMUDevice.StopIMU(IMUDevice, self.process['pid'], self.script_cfg)
+                self.End()
+
+                if self.script_cfg['debug']:
+                    print(' new camera connection failed ')
+
+            else:
+
+                # set the camera process
+                self.process['camera'] = camera
+
 
             print("| connection(s) successful, waiting on", self.script_cfg['triggers'] ,"trigger(s) |")
             return True
@@ -215,11 +243,10 @@ class PhotoGrab:
         # if we have a trigger lets do this
         if trigger:
 
-            self.process['count'] += 1  # this trigger counts
             self.process['loop'] = 0  # reset the loop count
 
             if self.script_cfg['debug']:
-                print(' trigger true ', self.process['count'])
+                print(' trigger', self.process['count'], 'waiting on camera ')
 
             # grab a reliable piece of time
             trigger = datetime.now()  # system time, if we can get above we ignore this
@@ -230,7 +257,7 @@ class PhotoGrab:
             start = perf_counter()
 
             # lets fire the camera trigger
-            CameraDevice.Trigger(CameraDevice)
+            snap = CameraDevice.Trigger(CameraDevice, self.process['camera'], self.script_cfg)
 
             # tmp holder for the IMU data
             result['telemetry'] = '' # we will get this on post process
@@ -252,9 +279,22 @@ class PhotoGrab:
             result['stop_byte'] = stop_byte
             result['size'] = stop_byte - start_byte
 
-            print("| start -", trigger, "| stop -", delta, "| elapsed - {:.12f} seconds".format(elapsed), "|")
+            if snap:
 
-            return result
+                self.process['count'] += 1  # this trigger counts
+                print("| start -", trigger, "| stop -", delta, "| elapsed - {:.12f} seconds".format(elapsed), "|")
+                return result
+
+            elif snap == None:
+
+                sleep(0.10)
+                self.Event(False)
+
+            else:
+
+                sleep(0.10)
+                print(" camera ack return failed ", snap)
+                self.Event(False)
 
         # otherwise lets just do cleanup or whatever
         else:
@@ -264,4 +304,4 @@ class PhotoGrab:
 
             sleep(self.offsets_cfg['rest'])  # we should rest for X before we start again
 
-            return result
+            return False

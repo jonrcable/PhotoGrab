@@ -75,6 +75,10 @@ class IMUDevice:
                 # read the file segment fromthe byte points
                 log.seek(start_byte, 0)
                 part = log.read(byte_delta)
+
+                # convert the binary to ascii text
+                # test = part.decode('ascii')
+
                 # update this record to sql
                 DBLite.UpdateTelemetry(DBLite, connection, script_cfg, part, rowid)
                 # REPLACE self.UpdateTelemetry(part, rowid)

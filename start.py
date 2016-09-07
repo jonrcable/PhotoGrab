@@ -19,8 +19,11 @@ if path.isfile('config.inc'):
     camera_cfg = {}
     camera_cfg['baudrate'] = config.getint('camera_cfg', 'baudrate')
     camera_cfg['parity'] = config.get('camera_cfg', 'parity')
-    camera_cfg['stopbit'] = config.getint('camera_cfg', 'stopbit')
-    camera_cfg['datalen'] = config.getint('camera_cfg', 'datalen')
+    camera_cfg['bytesize'] = config.getint('camera_cfg', 'bytesize')
+    camera_cfg['stopbits'] = config.getint('camera_cfg', 'stopbits')
+    camera_cfg['timeout'] = config.getfloat('camera_cfg', 'timeout')
+    camera_cfg['device'] = config.get('camera_cfg', 'device')
+    camera_cfg['sleep'] = config.getfloat('camera_cfg', 'sleep')
 
     imu_cfg = {}
     imu_cfg['device'] = config.get('imu_cfg', 'device')
