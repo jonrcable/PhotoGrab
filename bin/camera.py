@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import serial, io, glob
 from time import sleep
-from shutil import copyfile, move
+from shutil import copyfile, move, rmtree
 from os import path, mkdir, remove
 
 # define our camera class
@@ -45,7 +45,7 @@ class CameraDevice:
                 print(test)
 
                 # camera.open()
-                cmd = "$D1\n"
+                cmd = "$D1<cr>"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 response = camera.read(7)
@@ -92,42 +92,50 @@ class CameraDevice:
                 print("switch back to camera mode")
                 test = camera.readline()
                 # camera.open()
-                cmd = "$D5"
+                cmd = "$D5\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 sleep(0.2)
                 response = camera.readline()
                 print(response)
 
-                cmd = "$Pu"
+                cmd = "$Pu\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 sleep(0.2)
                 response = camera.readline()
                 print(response)
 
-                cmd = "$D5"
+                # sleep(0.5)
+
+                cmd = "$D5\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 sleep(0.2)
                 response = camera.readline()
                 print(response)
 
-                cmd = "$D9"
+                if not response == b'Status:PHOTO-MODE\n':
+                    print(" not the right mode ")
+                    CameraDevice.CameraMode(CameraDevice, camera, script_cfg)
+
+                cmd = "$D9\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 sleep(0.2)
                 response = camera.readline()
                 print(response)
 
-                cmd = "$D7"
+                cmd = "$D7\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 sleep(0.2)
                 response = camera.readline()
                 print(response)
 
-                cmd = "$Pm"
+                # sleep(0.5)
+
+                cmd = "$Pm\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 sleep(0.2)
@@ -154,35 +162,41 @@ class CameraDevice:
                 print(test)
 
                 # camera.open()
-                cmd = "$D5"
+                cmd = "$D5\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 sleep(0.2)
                 response = camera.readline()
                 print(response)
 
-                cmd = "$Pu"
+                cmd = "$Pu\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 sleep(0.2)
                 response = camera.readline()
                 print(response)
 
-                cmd = "$D5"
+                #sleep(0.5)
+
+                cmd = "$D5\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 sleep(0.2)
                 response = camera.readline()
                 print(response)
 
-                cmd = "$D9"
+                if not response == b'Status:USB-MODE\n':
+                    print(" not the right mode ")
+                    CameraDevice.USBMode(CameraDevice, camera, script_cfg)
+
+                cmd = "$D9\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 sleep(0.2)
                 response = camera.readline()
                 print(response)
 
-                cmd = "$D7"
+                cmd = "$D7\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 sleep(0.2)
@@ -191,6 +205,8 @@ class CameraDevice:
 
                 response = camera.readline()
                 print(response)
+
+                sleep(0.5)
 
                 return True
 
@@ -231,6 +247,41 @@ class CameraDevice:
                     print(' created an images directory ')
 
             move(camera_cfg['mount'], script_cfg['path'] + '/tmp/images')
+
+            rmtree(camera_cfg['mount'])
+
+            return True
+
+        except:
+
+            return False
+
+    def ClearImages(self, camera, camera_cfg, script_cfg):
+
+        try:
+
+            print(' testing the mode ')
+
+            cmd = "$D1<cr>"
+            camera.write(cmd.encode('ascii'))
+            camera.flush()
+            response = camera.read(7)
+            # response = camera.readline()
+
+            if script_cfg['debug']:
+                print(response)
+
+            if response == b'@D1:LED':
+                CameraDevice.USBMode(CameraDevice, camera, script_cfg)
+                CameraDevice.TestMount(CameraDevice, camera_cfg, 0)
+
+            # make sure the dir does not already exists and create it
+            if path.isdir(camera_cfg['mount']):
+                rmtree(camera_cfg['mount'])
+                if script_cfg['debug']:
+                    print(' removed the cameras stale images ')
+
+            CameraDevice.CameraMode(CameraDevice, camera, script_cfg)
 
             return True
 

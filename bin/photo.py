@@ -239,6 +239,7 @@ class PhotoGrab:
                 # set the camera process
                 self.process['camera'] = camera
 
+            # CameraDevice.ClearImages(CameraDevice, camera, self.camera_cfg, self.script_cfg)
 
             print("| connection(s) successful, waiting on", self.script_cfg['triggers'] ,"trigger(s) |")
             return True
