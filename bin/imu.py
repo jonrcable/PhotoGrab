@@ -21,7 +21,9 @@ class IMUDevice:
                 log.flush()  # <-- here's something not to forget!
 
                 # run a simple cat command as a background process to capture the data to a file
-                proc = Popen("cat " + imu_cfg['device'], stdout=log, stderr=log, shell=True)
+                proc = Popen("(stty 38400 cs8 -cstopb -parity; cat > " + script_cfg['path'] + "/tmp/imu.txt) < " + imu_cfg['device'], shell=True)
+                # stty -F /dev/ttyS0 115200 cs8 parenb -parodd
+                # proc = Popen("(stty -F " + imu_cfg['device'] + " 38400 cs8 -cstopb; cat > " + script_cfg['path'] + "/tmp/imu.txt)", shell=True)
                 if script_cfg['debug']:
                     print(" imu collection started process: ", proc.pid)
                     print(" sleep for (", imu_cfg['delay'] ,") seconds, waiting on imu ")

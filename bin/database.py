@@ -10,7 +10,7 @@ class DBLite:
         try:
             # create the new table to store the telemetry
             connection['database'].execute(
-                'CREATE TABLE triggers (trigger VARCHAR, elapsed VARCHAR, delta INTEGER, start_byte INTEGER, stop_byte INTEGER, size INTEGER, telemetry BLOB)')
+                'CREATE TABLE triggers (trigger VARCHAR, elapsed VARCHAR, delta INTEGER, start_byte INTEGER, stop_byte INTEGER, size INTEGER, telemetry BLOB, image VARCHAR)')
             connection['sql'].commit()
 
             if script_cfg['debug']:
@@ -70,7 +70,7 @@ class DBLite:
 
         try:
             # get all the rows
-            connection['database'].execute('SELECT rowid, trigger, start_byte, delta, stop_byte, elapsed, size, length(telemetry) FROM triggers')
+            connection['database'].execute('SELECT rowid, trigger, start_byte, delta, stop_byte, elapsed, size, length(telemetry), image FROM triggers')
             rows = connection['database'].fetchall()
 
             if script_cfg['debug']:
@@ -102,6 +102,30 @@ class DBLite:
 
             if script_cfg['debug']:
                 print(" fail to update trigger", rowid, "with imu information ")
+
+            return False
+
+    # update a row with its telemetry
+    def UpdateImages(self, connection, script_cfg, rows, images):
+
+        try:
+
+            # loop the log information from the collected triggers
+            i = 0
+            for index, row in enumerate(rows):
+                image = images[i].split(script_cfg['path'] + "/tmp/images")
+                rowid = row[0]
+                connection['database'].execute("UPDATE triggers SET image = ? WHERE rowid = ?", (image[1], rowid))
+                connection['sql'].commit()
+                print(" matched img to sql", image[1])
+                i += 1
+
+            return True
+
+        except:
+
+            if script_cfg['debug']:
+                print(" failed to updates images in the database ")
 
             return False
 

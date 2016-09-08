@@ -1,6 +1,8 @@
 #!/usr/bin/python
-import serial, io
+import serial, io, glob
 from time import sleep
+from shutil import copyfile, move
+from os import path, mkdir, remove
 
 # define our camera class
 class CameraDevice:
@@ -43,7 +45,7 @@ class CameraDevice:
                 print(test)
 
                 # camera.open()
-                cmd = "$D1"
+                cmd = "$D1\n"
                 camera.write(cmd.encode('ascii'))
                 camera.flush()
                 response = camera.read(7)
@@ -59,60 +61,84 @@ class CameraDevice:
 
                 if response == b'@D1:WAR':
 
-                    print("switch back to camera mode")
-                    test = camera.readline()
-                    # camera.open()
-                    cmd = "$D5"
-                    camera.write(cmd.encode('ascii'))
-                    camera.flush()
-                    sleep(0.2)
-                    response = camera.readline()
-                    print(response)
-
-                    cmd = "$Pu"
-                    camera.write(cmd.encode('ascii'))
-                    camera.flush()
-                    sleep(0.2)
-                    response = camera.readline()
-                    print(response)
-
-                    cmd = "$D5"
-                    camera.write(cmd.encode('ascii'))
-                    camera.flush()
-                    sleep(0.2)
-                    response = camera.readline()
-                    print(response)
-
-                    cmd = "$D9"
-                    camera.write(cmd.encode('ascii'))
-                    camera.flush()
-                    sleep(0.2)
-                    response = camera.readline()
-                    print(response)
-
-                    cmd = "$D7"
-                    camera.write(cmd.encode('ascii'))
-                    camera.flush()
-                    sleep(0.2)
-                    response = camera.readline()
-                    print(response)
-
-                    cmd = "$Pm"
-                    camera.write(cmd.encode('ascii'))
-                    camera.flush()
-                    sleep(0.2)
-                    response = camera.readline()
-                    print(response)
+                    CameraDevice.CameraMode(CameraDevice, camera, script_cfg)
 
                     return False
                 else:
 
                     return False
 
+            else:
+
+                return False
+
         except:
 
             if script_cfg['debug']:
                 print(" camera trigger failed ")
+            return False
+
+
+    def CameraMode(self, camera, script_cfg):
+
+        try:
+
+            camera.close()
+            camera.open()
+
+            test = camera.readline()
+            if test == b'':
+
+                print("switch back to camera mode")
+                test = camera.readline()
+                # camera.open()
+                cmd = "$D5"
+                camera.write(cmd.encode('ascii'))
+                camera.flush()
+                sleep(0.2)
+                response = camera.readline()
+                print(response)
+
+                cmd = "$Pu"
+                camera.write(cmd.encode('ascii'))
+                camera.flush()
+                sleep(0.2)
+                response = camera.readline()
+                print(response)
+
+                cmd = "$D5"
+                camera.write(cmd.encode('ascii'))
+                camera.flush()
+                sleep(0.2)
+                response = camera.readline()
+                print(response)
+
+                cmd = "$D9"
+                camera.write(cmd.encode('ascii'))
+                camera.flush()
+                sleep(0.2)
+                response = camera.readline()
+                print(response)
+
+                cmd = "$D7"
+                camera.write(cmd.encode('ascii'))
+                camera.flush()
+                sleep(0.2)
+                response = camera.readline()
+                print(response)
+
+                cmd = "$Pm"
+                camera.write(cmd.encode('ascii'))
+                camera.flush()
+                sleep(0.2)
+                response = camera.readline()
+                print(response)
+                return True
+
+        except:
+
+            if script_cfg['debug']:
+                print(" camera mode failed ")
             return False
 
 
@@ -171,6 +197,51 @@ class CameraDevice:
         except:
 
             if script_cfg['debug']:
-                print(" camera trigger failed ")
+                print(" usb mode failed ")
 
             return False
+
+    def TestMount(self, camera_cfg, i):
+
+        print("testing ", camera_cfg['mount'])
+
+        i = 0
+        while not path.isdir(camera_cfg['mount']):
+
+            print(" waiting on the mount device ", i)
+            i += 1
+            sleep(1)
+            if i > 60:
+                break
+
+        if path.isdir(camera_cfg['mount']):
+
+            print(" mount is available ")
+
+            return True
+
+    def CopyImages(self, camera_cfg, script_cfg):
+
+        try:
+
+            # make sure the dir does not already exists and create it
+            if not path.isdir(script_cfg['path'] + '/tmp/images'):
+                mkdir(script_cfg['path'] + '/tmp/images')
+                if script_cfg['debug']:
+                    print(' created an images directory ')
+
+            move(camera_cfg['mount'], script_cfg['path'] + '/tmp/images')
+
+            return True
+
+        except:
+
+            return False
+
+    def GetImages(self, camera_cfg, script_cfg):
+
+        images = []
+        for filename in glob.glob(script_cfg['path'] + '/tmp/images/**/*.JPG', recursive=True):
+            images.append(filename)
+
+        return images

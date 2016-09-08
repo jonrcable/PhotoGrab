@@ -24,6 +24,7 @@ if path.isfile('config.inc'):
     camera_cfg['timeout'] = config.getfloat('camera_cfg', 'timeout')
     camera_cfg['device'] = config.get('camera_cfg', 'device')
     camera_cfg['sleep'] = config.getfloat('camera_cfg', 'sleep')
+    camera_cfg['mount'] = config.get('camera_cfg', 'mount')
 
     imu_cfg = {}
     imu_cfg['device'] = config.get('imu_cfg', 'device')

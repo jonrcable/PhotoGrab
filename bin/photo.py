@@ -131,14 +131,25 @@ class PhotoGrab:
             # if we have reached the end, should we report
             rows = DBLite.DisplayDB(DBLite, self.process['connection'], self.script_cfg)
 
+            # switch the camera to USB Mode
+            CameraDevice.USBMode(CameraDevice, self.process['camera'], self.script_cfg)
+
             # update the rows with their binary telemetry
             IMUDevice.ProcessIMU(IMUDevice, self.process['connection'], self.script_cfg, rows)
 
-            # if we have reached the end, should we report
-            display = DBLite.DisplayDB(DBLite, self.process['connection'], self.script_cfg)
+            # test the mount is ready
+            Test = CameraDevice.TestMount(CameraDevice, self.camera_cfg, 0)
 
             # get the name of our archive before we close the database
             archive = DBLite.GetArchiveName(DBLite, self.process['connection'], self.script_cfg)
+
+            # copy the images off the camera
+            if Test:
+                CameraDevice.CopyImages(CameraDevice, self.camera_cfg, self.script_cfg)
+                images = CameraDevice.GetImages(CameraDevice, self.camera_cfg, self.script_cfg)
+                DBLite.UpdateImages(DBLite, self.process['connection'], self.script_cfg, rows, images)
+
+            CameraDevice.CameraMode(CameraDevice, self.process['camera'], self.script_cfg)
 
             print("| closing, ", self.process['count'], "/", self.script_cfg['triggers'], "success |")
 
@@ -146,16 +157,20 @@ class PhotoGrab:
 
             print("| closing ", self.process['count'], "/", self.script_cfg['triggers'], "failed |")
 
+        # if we have reached the end, should we report
+        display = DBLite.DisplayDB(DBLite, self.process['connection'], self.script_cfg)
+
+        # write a friendly csv file
+        FileStruct.WriteCSV(FileStruct, self.script_cfg, display)
+
         # close our connections
         DBLite.CloseDB(DBLite, self.process['connection'], self.script_cfg)
-
-        CameraDevice.USBMode(CameraDevice, self.process['camera'], self.script_cfg)
 
         # if we have result to display and save
         if self.process['count'] == self.script_cfg['triggers']:
 
             # pretty print the final results
-            print(tabulate(display, headers=["Trigger", "Start", "Byte", "Stop", "Byte", "Runtime", "Segment (size)", "BLOB (size)"], floatfmt=".12f"))
+            print(tabulate(display, headers=["Trigger", "Start", "Byte", "Stop", "Byte", "Runtime", "Segment (size)", "BLOB (size)", "Image"], floatfmt=".12f"))
 
             # move the database/imu data to a new store location
             FileStruct.Save(FileStruct, self.script_cfg, archive)

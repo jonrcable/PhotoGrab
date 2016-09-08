@@ -1,20 +1,24 @@
-# script config file
-# copy to config.inc to run
+# script configuation file
 
 [camera_cfg]
-    baudrate = 384000
-    parity = None
-    timeout = 0
-    stopbit = 1
-    datalen = 8
-    device = /dev/USB0
+    baudrate = 9600
+    parity = N
+    bytesize = 8
+    stopbits = 1
+    timeout = 0.70
+    device = /dev/cu.usbserial
+    sleep = 0.04
+    mount = /Volumes/NO NAME/DCIM
 
 # ---- offsets_cfg.info -----
 # device - the device location to read from
 # delay - the time to delay while the imu starts
+# sample imu - device = /dev/cu.wchusbserial14120
+# usb serial adapter = /dev/cu.KeySerial1
+# usb serial adapter = /dev/cu.usbserial
 # ---------
 [imu_cfg]
-    device = /dev/cu.wchusbserial1410
+    device = /dev/cu.wchusbserial14120
     delay = 2
 
 # ---- offsets_cfg.info -----
@@ -37,4 +41,4 @@
     path = /Users/Jon/Development/Code/Apps/CameraIMU
     archive = /Users/Jon/Development/Code/Apps/CameraIMU
     max = 1000
-    triggers = 5
+    triggers = 2
