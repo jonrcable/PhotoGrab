@@ -78,7 +78,7 @@ class CameraDevice:
                 print(" camera trigger failed ")
             return False
 
-
+    # switch to camera mode
     def CameraMode(self, camera, script_cfg):
 
         try:
@@ -217,6 +217,7 @@ class CameraDevice:
 
             return False
 
+    # test the mount, loop and fail
     def TestMount(self, camera_cfg, i):
 
         print("testing ", camera_cfg['mount'])
@@ -236,6 +237,7 @@ class CameraDevice:
 
             return True
 
+    # this copies all the images from the camera to the archive path
     def CopyImages(self, camera_cfg, script_cfg):
 
         try:
@@ -246,8 +248,10 @@ class CameraDevice:
                 if script_cfg['debug']:
                     print(' created an images directory ')
 
+            # move the images to the tmp location
             move(camera_cfg['mount'], script_cfg['path'] + '/tmp/images')
 
+            # clean up the images from the camera
             rmtree(camera_cfg['mount'])
 
             return True
@@ -256,6 +260,7 @@ class CameraDevice:
 
             return False
 
+    # we are not using this, but it clears out all the images on the camera
     def ClearImages(self, camera, camera_cfg, script_cfg):
 
         try:
