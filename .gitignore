@@ -3,3 +3,4 @@ config.inc
 /tmp
 /archives
 /bin/__pycache__
+/images

@@ -9,8 +9,10 @@ class DBLite:
 
         try:
             # create the new table to store the telemetry
+
             connection['database'].execute(
-                'CREATE TABLE triggers (trigger VARCHAR, elapsed VARCHAR, delta INTEGER, start_byte INTEGER, stop_byte INTEGER, size INTEGER, telemetry BLOB, image VARCHAR)')
+                'CREATE TABLE triggers (trigger VARCHAR, trigger_lapse VARCHAR, camera_lapse VARCHAR, imu_byte INTEGER, telemetry BLOB, image VARCHAR, size INTEGER)')
+
             connection['sql'].commit()
 
             if script_cfg['debug']:
@@ -20,19 +22,30 @@ class DBLite:
         except:
             # something went bad halt
             if script_cfg['debug']:
-                print(' failed to create a new database ')
+                print(' failed to create a new database table')
             # fail
             return False
 
     # start the database connection
     def StartDB(self, script_cfg):
 
-        connection = {}
-        # init connection to a new sqlite database
-        connection['sql'] = sqlite3.connect(script_cfg['path'] + '/tmp/process.sqlite')
-        connection['database'] = connection['sql'].cursor()
+        try:
 
-        return connection
+            connection = {}
+            # init connection to a new sqlite database
+            connection['sql'] = sqlite3.connect(script_cfg['path'] + '/tmp/process.sqlite')
+            connection['database'] = connection['sql'].cursor()
+
+            if script_cfg['debug']:
+                print(' new database connection opened ')
+            return connection
+
+        except:
+            # something went bad halt
+            if script_cfg['debug']:
+                print(' failed to create a new database connection ')
+            # fail
+            return False
 
     # if we opened connections we need to close them
     def CloseDB(self, connection, script_cfg):
@@ -50,8 +63,8 @@ class DBLite:
 
         try:
             # create the new table to store the telemetry
-            connection['database'].execute('''INSERT INTO triggers (trigger, elapsed, delta, start_byte, stop_byte, size, telemetry) VALUES(?,?,?,?,?,?, ?)''',
-                                  (result['trigger'], result['elapsed'], result['delta'], result['start_byte'], result['stop_byte'], result['size'], result['telemetry']))
+            connection['database'].execute('''INSERT INTO triggers (trigger, trigger_lapse, camera_lapse, imu_byte, telemetry, image, size) VALUES(?,?,?,?,?,?,?)''',
+                                  (result['trigger'], result['trigger_lapse'], result['camera_lapse'], result['imu_byte'], result['telemetry'], result['image'], result['size']))
             connection['sql'].commit()
 
             if script_cfg['debug']:
@@ -70,7 +83,7 @@ class DBLite:
 
         try:
             # get all the rows
-            connection['database'].execute('SELECT rowid, trigger, start_byte, delta, stop_byte, elapsed, size, length(telemetry), image FROM triggers')
+            connection['database'].execute('SELECT rowid, trigger, trigger_lapse, camera_lapse, imu_byte, image, size, telemetry FROM triggers')
             rows = connection['database'].fetchall()
 
             if script_cfg['debug']:
@@ -85,9 +98,25 @@ class DBLite:
 
             return False
 
+    # return the name of he archive before we close the sq databse
+    def GetArchiveName(self, connection, script_cfg):
+
+        try:
+            # get the last row from the table
+            connection['database'].execute('SELECT rowid, trigger FROM triggers ORDER BY rowid LIMIT 1')
+            save = connection['database'].fetchone()
+            # remove any special chars
+            archive = re.sub('[^a-zA-Z0-9\n]', '', save[1])
+
+            return archive
+        except:
+            print(' fail to get the archive name ')
+
+            return False
+
+    # MAYBE, not currently in use
     # update a row with its telemetry
     def UpdateTelemetry(self, connection, script_cfg, binary, rowid):
-
         try:
 
             connection['database'].execute("UPDATE triggers SET telemetry = ? WHERE rowid = ?", (binary, rowid))
@@ -105,9 +134,9 @@ class DBLite:
 
             return False
 
-    # update a row with its telemetry
+    # DEPRECIATED, left for sort logic
+    # line up each row with the proper image
     def UpdateImages(self, connection, script_cfg, rows, images):
-
         try:
 
             # loop the log information from the collected triggers
@@ -126,21 +155,5 @@ class DBLite:
 
             if script_cfg['debug']:
                 print(" failed to updates images in the database ")
-
-            return False
-
-    # return the name of he archive before we close the sq databse
-    def GetArchiveName(self, connection, script_cfg):
-
-        try:
-            # get the last row from the table
-            connection['database'].execute('SELECT rowid, trigger FROM triggers ORDER BY rowid LIMIT 1')
-            save = connection['database'].fetchone()
-            # remove any special chars
-            archive = re.sub('[^a-zA-Z0-9\n]', '', save[1])
-
-            return archive
-        except:
-            print(' fail to get the archive name ')
 
             return False

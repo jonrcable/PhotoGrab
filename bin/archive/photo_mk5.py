@@ -8,7 +8,7 @@ from tabulate import tabulate
 from bin.database import DBLite
 from bin.structure import FileStruct
 from bin.imu import IMUDevice
-from bin.camera import CameraDevice
+from bin.cameras.camera import CameraDevice
 
 # define our main class
 class PhotoGrab:
@@ -268,7 +268,7 @@ class PhotoGrab:
             trigger = datetime.now()  # system time, if we can get above we ignore this
 
             # get the start byte of our imu file
-            start_byte = path.getsize(self.script_cfg['path'] + '/tmp/imu.txt')
+            start_byte = path.getsize(self.script_cfg['path'] + '/tmp/imu.dat')
             # start the timer
             start = perf_counter()
 
@@ -279,7 +279,7 @@ class PhotoGrab:
             result['telemetry'] = '' # we will get this on post process
 
             # get the stop byte of our imu file
-            stop_byte = path.getsize(self.script_cfg['path'] + '/tmp/imu.txt')
+            stop_byte = path.getsize(self.script_cfg['path'] + '/tmp/imu.dat')
             # end the counter
             stop = perf_counter()
 

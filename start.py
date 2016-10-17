@@ -3,7 +3,7 @@ from configparser import ConfigParser
 from os import path
 
 # load our custom classes
-from bin.photo import PhotoGrab
+from bin.photo_pi import PhotoGrab
 
 # RUN THIS AUTO
 # choose a custom config or fail
@@ -17,16 +17,31 @@ if path.isfile('config.inc'):
 
     # these are to store the hardware configs
     camera_cfg = {}
-    camera_cfg['baudrate'] = config.getint('camera_cfg', 'baudrate')
-    camera_cfg['parity'] = config.get('camera_cfg', 'parity')
-    camera_cfg['bytesize'] = config.getint('camera_cfg', 'bytesize')
-    camera_cfg['stopbits'] = config.getint('camera_cfg', 'stopbits')
-    camera_cfg['timeout'] = config.getfloat('camera_cfg', 'timeout')
-    camera_cfg['device'] = config.get('camera_cfg', 'device')
-    camera_cfg['sleep'] = config.getfloat('camera_cfg', 'sleep')
-    camera_cfg['mount'] = config.get('camera_cfg', 'mount')
+    camera_cfg['exposure_mode'] = config.get('camera_cfg', 'exposure_mode')
+    camera_cfg['iso'] = config.getint('camera_cfg', 'iso')
+    camera_cfg['awb_mode'] = config.get('camera_cfg', 'awb_mode')
+    camera_cfg['awb_gains'] = config.getfloat('camera_cfg', 'awb_gains')
+    camera_cfg['shutter_speed'] = config.getint('camera_cfg', 'shutter_speed')
+    camera_cfg['brightness'] = config.getint('camera_cfg', 'brightness')
+    camera_cfg['resolution'] = config.get('camera_cfg', 'resolution')
+    camera_cfg['sensor_mode'] = config.getint('camera_cfg', 'sensor_mode')
+    camera_cfg['exposure_compensation'] = config.getint('camera_cfg', 'exposure_compensation')
+    camera_cfg['meter_mode'] = config.get('camera_cfg', 'meter_mode')
+    camera_cfg['contrast'] = config.getint('camera_cfg', 'contrast')
+    camera_cfg['led_count'] = config.getint('camera_cfg', 'led_count')
+    camera_cfg['led_pin'] = config.getint('camera_cfg', 'led_pin')
+    camera_cfg['led_freq_hz'] = config.getint('camera_cfg', 'led_freq_hz')
+    camera_cfg['led_dma'] = config.getint('camera_cfg', 'led_dma')
+    camera_cfg['led_brightness'] = config.getint('camera_cfg', 'led_brightness')
+    camera_cfg['led_inverter'] = config.getboolean('camera_cfg', 'led_inverter')
+    camera_cfg['led_channel'] = config.getint('camera_cfg', 'led_channel')
+    camera_cfg['led_color_r'] = config.getint('camera_cfg', 'led_color_r')
+    camera_cfg['led_color_g'] = config.getint('camera_cfg', 'led_color_g')
+    camera_cfg['led_color_b'] = config.getint('camera_cfg', 'led_color_b')
 
     imu_cfg = {}
+    imu_cfg['stream'] = config.get('imu_cfg', 'stream')
+    imu_cfg['baudrate'] = config.get('imu_cfg', 'baudrate')
     imu_cfg['device'] = config.get('imu_cfg', 'device')
     imu_cfg['delay'] = config.getint('imu_cfg', 'delay')
 

@@ -11,7 +11,7 @@ sudo apt-get install libyaml-dev
     sudo -H ./get-pip.py
     
 - install the following pythong libs
-    sudo -H pip3.5 install pyserial sqlite3 re
+    sudo -H pip3.5 install pyserial sqlite3 re configparser
 
 ## Example Output (pretty)
 | starting, autotigger - True |
@@ -136,3 +136,8 @@ process start  0  will run  1000  or  5  triggers
 # Notes for later
 this is exactly what we need!
 http://vislab-ccom.unh.edu/~schwehr/rt/python-binary-files.html
+
+Instaling gphoto
+
+requires brew install pkg-config
+sudo pip3 install gphoto2

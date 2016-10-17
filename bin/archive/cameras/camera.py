@@ -1,3 +1,6 @@
+# mk5 camera serial connection CLASS
+# dated fail tests - does not work for PR
+# camera is too slow
 #!/usr/bin/python
 import serial, io, glob
 from time import sleep
@@ -7,6 +10,7 @@ from os import path, mkdir, remove
 # define our camera class
 class CameraDevice:
 
+    # connect to the camer over the serial device
     def Connect(self, camera_cfg, script_cfg):
 
         try:
@@ -294,6 +298,7 @@ class CameraDevice:
 
             return False
 
+    # get all the images in the tmp directory
     def GetImages(self, camera_cfg, script_cfg):
 
         images = []
